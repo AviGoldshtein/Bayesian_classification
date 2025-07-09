@@ -12,13 +12,13 @@ column_trained_by = model[trained_by]
 model.drop(inplace=True, columns=[trained_by])
 
 statistics = {"sum": {"total_cases": len(copy_model.index)}}
-for unique_posiability in column_trained_by.unique():
-    statistics['sum'][unique_posiability] = (copy_model[trained_by] == unique_posiability).sum()
-    statistics[unique_posiability] = {}
+for target_value in column_trained_by.unique():
+    statistics['sum'][target_value] = (copy_model[trained_by] == target_value).sum()
+    statistics[target_value] = {}
     for column in model.columns:
-        statistics[unique_posiability][column] = {}
+        statistics[target_value][column] = {}
         for unique_key in model[column].unique():
-            statistics[unique_posiability][column][unique_key] = ((copy_model[column] == unique_key) & (copy_model[trained_by] == unique_posiability)).sum() / statistics['sum'][unique_posiability]
+            statistics[target_value][column][unique_key] = ((copy_model[column] == unique_key) & (copy_model[trained_by] == target_value)).sum() / statistics['sum'][target_value]
 
 pprint.pprint(statistics, width=120)
 
