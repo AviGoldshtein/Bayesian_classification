@@ -1,0 +1,6 @@
+weather,day,go
+sunny,weekday,yes
+sunny,weekday,no
+rainy,weekday,no
+rainy,weekend,yes
+sunny,weekend,yes

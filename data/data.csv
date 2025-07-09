@@ -1,0 +1,16 @@
+humidity,temperature,whether,go
+low,hot,sun,yes
+high,cold,rain,no
+high,hot,rain,yes
+low,cold,sun,no
+low,cold,rain,yes
+high,cold,sun,yes
+low,cold,sun,no
+high,cold,rain,no
+low,cold,sun,no
+medium,cold,sun,yes
+medium,cold,sun,yes
+low,hot,sun,yes
+high,cold,sun,no
+medium,hot,sun,yes
+medium,hot,sun,yes
