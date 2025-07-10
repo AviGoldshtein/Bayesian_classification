@@ -16,6 +16,7 @@ class Naive_bayes:
             statistics[target_value] = {}
             for column in df.columns:
                 statistics[target_value][column] = {}
-                for unique_key in df[column].unique():
-                    statistics[target_value][column][unique_key] = ((copy_df[column] == unique_key) & (copy_df[trained_by] == target_value)).sum() / statistics['sum'][target_value]
+                unique_keys_in_column = df[column].unique()
+                for unique_key in unique_keys_in_column:
+                    statistics[target_value][column][unique_key] = (((copy_df[column] == unique_key) & (copy_df[trained_by] == target_value)).sum() + 1) / (statistics['sum'][target_value] + len(unique_keys_in_column))
         return statistics

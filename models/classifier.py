@@ -12,10 +12,10 @@ class Classifier:
                     list_of_nums.append(num)
                 list_of_nums.append(model['sum'][option] / model['sum']['total_cases'])
                 list_of_nums = np.array(list_of_nums)
-                if 0 in list_of_nums:
-                    list_of_nums += 1
+                # if 0 in list_of_nums:
+                #     list_of_nums += 1
                 result = np.prod(list_of_nums)
-                result %= 1
+                # result %= 1
                 final_result[option] = result
 
         # for key, val in final_result.items():
