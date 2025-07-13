@@ -1,16 +1,16 @@
 from sklearn.model_selection import train_test_split
-from utiles.extract_keys import Extract_keys
-from utiles.cleaner import Cleaner
-from models.naive_bayes import Naive_bayes
-from models.classifier import Classifier
-from tests.test import Tester
-from dal.dal import Dal
-from ui.menu import Menu
+from client.utiles.extract_keys import Extract_keys
+from client.utiles.cleaner import Cleaner
+from server.logics.models.classifier import Classifier
+from client.ui.menu import Menu
+import requests
+import pandas as pd
 
 class Manager:
     def __init__(self):
+        self.URL = "http://127.0.0.1:8000/"
         self.model = None
-        self.suggestions = None
+        self.labels_and_unique_keys = None
         self.accuracy = None
 
     def run(self):
@@ -18,17 +18,20 @@ class Manager:
         while running:
             choice = Menu.show_menu()
             if choice == "1":
-                chosen_file = Menu.suggest_options(Dal.get_list_files())
-                raw_df = Dal.load_data("data/" + chosen_file)
+                list_of_files = requests.get(self.URL + "get_files_list").json()['files_list']
+                chosen_file = Menu.suggest_options(list_of_files)
+                raw_df_list_of_dicts = requests.get(f"{self.URL}/load_data/{chosen_file}").json()['df']
+                raw_df = pd.DataFrame(raw_df_list_of_dicts)
                 self.raw_df_handler(raw_df)
             elif choice == "2":
                 url = input("Enter a link or URL")
-                raw_df = Dal.load_data(url)
-                self.raw_df_handler(raw_df)
+                # raw_df = Dal.load_data(url)
+                # self.raw_df_handler(raw_df)
+                print("Currently under renovations")
             elif choice == "3":
                 if self.model:
-                    chosen_params = Menu.get_params(self.suggestions)
-                    print(f"the answer is:  {Classifier.ask_a_question(self.model, chosen_params)}.\n"
+                    chosen_params_and_values = Menu.choose_params_and_values(self.labels_and_unique_keys)
+                    print(f"the answer is:  {Classifier.ask_a_question(self.model, chosen_params_and_values)}.\n"
                           f"but take care, because the accuracy is: {self.accuracy}.%\n")
                 else:
                     print("Choose first a file to work with\n")
@@ -41,10 +44,15 @@ class Manager:
     def raw_df_handler(self, raw_df):
         self.suggest_deleting_columns(raw_df)
         cleaned_df = Cleaner.ensure_there_is_no_nan(raw_df)
-        self.suggestions = Extract_keys.extract(cleaned_df)
+        self.labels_and_unique_keys = Extract_keys.extract_labels_and_unique_keys(cleaned_df)
         train_df, test_df = train_test_split(cleaned_df, test_size=0.3)
-        self.model = Naive_bayes.train_model(train_df)
-        self.accuracy = Tester.check_accuracy(self.model, test_df)
+        response = requests.post(f"{self.URL}train_model", json=train_df.to_dict(orient="records"))
+        print("STATUS CODE:", response.status_code)
+        print("RESPONSE TEXT:", response.text)
+
+        self.model = response.json()
+        response = requests.post(f"{self.URL}check_accuracy", json={"trained_model": self.model, "test_df": test_df.to_dict(orient="records")})
+        self.accuracy = response.json()['accuracy']
         print(f'The testing is over. Accuracy of {self.accuracy} %')
 
     def suggest_deleting_columns(self, df):
