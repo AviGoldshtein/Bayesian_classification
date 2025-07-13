@@ -42,18 +42,18 @@ class Manager:
                 print("invalid choice")
 
     def raw_df_handler(self, raw_df):
-        self.suggest_deleting_columns(raw_df)
+        raw_df = self.suggest_deleting_columns(raw_df)
         cleaned_df = Cleaner.ensure_there_is_no_nan(raw_df)
         self.labels_and_unique_keys = Extract_keys.extract_labels_and_unique_keys(cleaned_df)
         train_df, test_df = train_test_split(cleaned_df, test_size=0.3)
         response = requests.post(f"{self.URL}train_model", json=train_df.to_dict(orient="records"))
-        print("STATUS CODE:", response.status_code)
-        print("RESPONSE TEXT:", response.text)
-
-        self.model = response.json()
-        response = requests.post(f"{self.URL}check_accuracy", json={"trained_model": self.model, "test_df": test_df.to_dict(orient="records")})
-        self.accuracy = response.json()['accuracy']
-        print(f'The testing is over. Accuracy of {self.accuracy} %')
+        if response.ok:
+            self.model = response.json()
+            response = requests.post(f"{self.URL}check_accuracy", json={"trained_model": self.model, "test_df": test_df.to_dict(orient="records")})
+            self.accuracy = response.json()['accuracy']
+            print(f'The testing is over. Accuracy of {self.accuracy} %')
+        else:
+            print("There was a problem loading the file.")
 
     def suggest_deleting_columns(self, df):
         choice = input("1. to delete any column of the table before training\n"
@@ -69,9 +69,11 @@ class Manager:
                 if done == "done":
                     break
             print("executing..")
-            Cleaner.drop_requested_columns(df, columns_to_delete)
+            cleaned_df = Cleaner.drop_requested_columns(df, columns_to_delete)
         elif choice == "2":
             print("Here we go")
+            return df
         else:
             print("invalid input")
-            self.suggest_deleting_columns(df)
+            return self.suggest_deleting_columns(df)
+        return cleaned_df

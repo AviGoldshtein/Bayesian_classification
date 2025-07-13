@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
 from server.logics.dal.dal import Dal
 from server.logics.models.naive_bayes import Naive_bayes
 from server.logics.utiles.servise import convert_numpy_types
@@ -8,10 +7,6 @@ import pandas as pd
 from typing import List, Dict, Any
 
 router = APIRouter()
-
-# class Something(BaseModel):
-#     name: str
-#     value: int
 
 @router.get("/")
 def health():
