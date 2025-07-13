@@ -1,9 +1,9 @@
-humidity,temperature,whether,go,stam,stam2
-low,hot,sun,yes,e
-high,cold,rain,no,e
-high,hot,rain,yes,fd
-low,cold,sun,no,ds
-low,cold,rain,yes,r
+humidity,temperature,whether,go
+low,hot,sun,yes
+high,cold,rain,no
+high,hot,rain,yes
+low,cold,sun,no
+low,cold,rain,yes
 high,cold,sun,yes
 low,cold,sun,no
 high,cold,rain,no

@@ -6,7 +6,7 @@ class Naive_bayes:
 
         trained_by = df.columns[-1]
 
-        df.sort_values(trained_by, inplace=True)
+        # df.sort_values(trained_by, inplace=True)
         column_trained_by = df[trained_by]
         df.drop(inplace=True, columns=[trained_by])
 

@@ -1,5 +1,3 @@
-import pandas as pd
-
 class Cleaner:
     @staticmethod
     def ensure_there_is_no_nan(df):

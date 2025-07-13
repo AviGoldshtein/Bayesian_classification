@@ -27,10 +27,10 @@ class Menu:
         return choices[num_choice]
 
     @staticmethod
-    def get_params(suggestion_dict):
+    def choose_params_and_values(suggestion_dict):
         chosen_options = {}
-        for suggestion in suggestion_dict:
-            print(f"for the parameter {suggestion}:")
-            chosen = Menu.suggest_options(suggestion_dict[suggestion])
-            chosen_options[suggestion] = chosen
+        for label in suggestion_dict:
+            print(f"for the parameter {label}:")
+            chosen = Menu.suggest_options(suggestion_dict[label])
+            chosen_options[label] = chosen
         return chosen_options
