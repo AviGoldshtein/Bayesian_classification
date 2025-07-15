@@ -5,7 +5,7 @@ class Menu:
         Presents the menu with all its options and gets user's choice.
         :return: the user's choice as a string
         """
-        choice = input("1. to select a local file to work with\n"
+        choice = input("\n1. to select a local file to work with\n"
                        "2. copy a link for a csv file\n"
                       "3. Analyze by model statistics\n"
                       "1000. to exit\n")
