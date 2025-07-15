@@ -1,6 +1,13 @@
 import numpy as np
 
 def convert_numpy_types(obj):
+    """
+    Converts a nested dictionary/list structure that may contain NumPy types
+    (like numpy floats, ints) to pure Python types.
+
+    :param obj: A Python object (dict, list, np.integer, np.floating)
+    :return: Same structure with NumPy types converted to native Python types.
+    """
     if isinstance(obj, dict):
         return {k: convert_numpy_types(v) for k, v in obj.items()}
     elif isinstance(obj, list):
