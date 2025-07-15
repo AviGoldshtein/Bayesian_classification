@@ -10,7 +10,7 @@ class Manager:
     def __init__(self):
         self.URL = "http://127.0.0.1:8000/"
         self.model = None
-        self.labels_and_unique_keys = None
+        self.features_and_unique_keys = None
         self.accuracy = None
 
     def run(self):
@@ -18,11 +18,25 @@ class Manager:
         while running:
             choice = Menu.show_menu()
             if choice == "1":
-                list_of_files = requests.get(self.URL + "get_files_list").json()['files_list']
-                chosen_file = Menu.suggest_options(list_of_files)
-                raw_df_list_of_dicts = requests.get(f"{self.URL}/load_data/{chosen_file}").json()['df']
-                raw_df = pd.DataFrame(raw_df_list_of_dicts)
-                self.raw_df_handler(raw_df)
+                try:
+                    response = requests.get(self.URL + "get_files_list")
+                    if response.ok:
+                        list_of_files = response.json()['files_list']
+                        chosen_file = Menu.suggest_options(list_of_files)
+                        response = requests.get(f"{self.URL}/load_data/{chosen_file}")
+                        if response.ok:
+                            raw_df_list_of_dicts = response.json()['df']
+                            raw_df = pd.DataFrame(raw_df_list_of_dicts)
+                            self.raw_df_handler(raw_df)
+                        else:
+                            print("There was a problem loading the file.")
+                            print(f"Status code: {response.status_code}")
+                    else:
+                        print("There was a problem getting the files list.")
+                        print(f"Status code: {response.status_code}")
+                except Exception as e:
+                    print("There was a error with the server.")
+                    print(f"Error: {e}.")
             elif choice == "2":
                 url = input("Enter a link or URL")
                 # raw_df = Dal.load_data(url)
@@ -30,11 +44,11 @@ class Manager:
                 print("Currently under renovations")
             elif choice == "3":
                 if self.model:
-                    chosen_params_and_values = Menu.choose_params_and_values(self.labels_and_unique_keys)
+                    chosen_params_and_values = Menu.choose_params_and_values(self.features_and_unique_keys)
                     print(f"the answer is:  {Classifier.ask_a_question(self.model, chosen_params_and_values)}.\n"
-                          f"but take care, because the accuracy is: {self.accuracy}.%\n")
+                          f"but take care, because the accuracy is: {self.accuracy}%.")
                 else:
-                    print("Choose first a file to work with\n")
+                    print("Choose first a file to work with")
             elif choice == "1000":
                 print("have a good day")
                 running = False
@@ -44,14 +58,18 @@ class Manager:
     def raw_df_handler(self, raw_df):
         raw_df = self.suggest_deleting_columns(raw_df)
         cleaned_df = Cleaner.ensure_there_is_no_nan(raw_df)
-        self.labels_and_unique_keys = Extract_keys.extract_labels_and_unique_keys(cleaned_df)
+        self.features_and_unique_keys = Extract_keys.extract_features_and_unique_keys(cleaned_df)
         train_df, test_df = train_test_split(cleaned_df, test_size=0.3)
         response = requests.post(f"{self.URL}train_model", json=train_df.to_dict(orient="records"))
         if response.ok:
             self.model = response.json()
             response = requests.post(f"{self.URL}check_accuracy", json={"trained_model": self.model, "test_df": test_df.to_dict(orient="records")})
-            self.accuracy = response.json()['accuracy']
-            print(f'The testing is over. Accuracy of {self.accuracy} %')
+            if response.ok:
+                self.accuracy = response.json()['accuracy']
+                print(f'The testing is over. Accuracy of {self.accuracy} %')
+            else:
+                print("There was a problem checking accuracy.")
+                print(response.status_code)
         else:
             print("There was a problem loading the file.")
 
@@ -60,7 +78,7 @@ class Manager:
                        "2. to continue to training")
         if choice == "1":
             columns_to_delete = []
-            list_of_columns = Extract_keys.get_columns_list(df)[:-1]
+            list_of_columns = Extract_keys.get_column_names(df)[:-1]
             while len(list_of_columns) > 0:
                 chosen_column = Menu.suggest_options(list_of_columns)
                 columns_to_delete.append(chosen_column)
