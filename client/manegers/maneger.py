@@ -1,17 +1,9 @@
-from sklearn.model_selection import train_test_split
-from client.utiles.extract_keys import Extract_keys
-from client.utiles.cleaner import Cleaner
-from server.logics.models.classifier import Classifier
 from client.ui.menu import Menu
 import requests
-import pandas as pd
 
 class Manager:
     def __init__(self):
         self.URL = "http://127.0.0.1:8000/"
-        self.model = None
-        self.features_and_unique_keys = None
-        self.accuracy = None
 
     def run(self):
         running = True
@@ -25,9 +17,14 @@ class Manager:
                         chosen_file = Menu.suggest_options(list_of_files)
                         response = requests.get(f"{self.URL}/load_data/{chosen_file}")
                         if response.ok:
-                            raw_df_list_of_dicts = response.json()['df']
-                            raw_df = pd.DataFrame(raw_df_list_of_dicts)
-                            self.raw_df_handler(raw_df)
+                            self.suggest_deleting_columns()
+                            response = requests.get(f"{self.URL}raw_df_handler")
+                            if response.ok:
+                                accuracy = response.json()['accuracy']
+                                print(f'The testing is over. Accuracy of {accuracy} %')
+                            else:
+                                print("There was a problem handling the proses")
+                                print(f"status code: {response.status_code}")
                         else:
                             print("There was a problem loading the file.")
                             print(f"Status code: {response.status_code}")
@@ -43,55 +40,62 @@ class Manager:
                 # self.raw_df_handler(raw_df)
                 print("Currently under renovations")
             elif choice == "3":
-                if self.model:
-                    chosen_params_and_values = Menu.choose_params_and_values(self.features_and_unique_keys)
-                    print(f"the answer is:  {Classifier.ask_a_question(self.model, chosen_params_and_values)}.\n"
-                          f"but take care, because the accuracy is: {self.accuracy}%.")
-                else:
-                    print("Choose first a file to work with")
+                try:
+                    response = requests.get(f"{self.URL}get_features_and_unique_keys")
+                    if response.ok:
+                        content = response.json()
+                        if content['model']:
+                            features_and_unique_keys = content['features_and_unique_keys']
+                            chosen_params_and_values = Menu.choose_params_and_values(features_and_unique_keys)
+                            response = requests.post(f"{self.URL}classify", json=chosen_params_and_values)
+                            if response.ok:
+                                content = response.json()
+                                print(f"the answer is:  {content['classification']}.\n"
+                                      f"but take care because the accuracy is {content['accuracy']}%.")
+                            else:
+                                print("There was a problem with the classification")
+                                print(f"status code: {response.status_code}")
+                        else:
+                            print("Choose first a file to work with")
+                    else:
+                        print("There was a problem with the get_features_and_unique_keys")
+                        print(f"status code: {response.status_code}")
+                except Exception as e:
+                    print("There was a error with the server.")
+                    print(f"Error: {e}.")
             elif choice == "1000":
                 print("have a good day")
                 running = False
             else:
                 print("invalid choice")
 
-    def raw_df_handler(self, raw_df):
-        raw_df = self.suggest_deleting_columns(raw_df)
-        cleaned_df = Cleaner.ensure_there_is_no_nan(raw_df)
-        self.features_and_unique_keys = Extract_keys.extract_features_and_unique_keys(cleaned_df)
-        train_df, test_df = train_test_split(cleaned_df, test_size=0.3)
-        response = requests.post(f"{self.URL}train_model", json=train_df.to_dict(orient="records"))
-        if response.ok:
-            self.model = response.json()
-            response = requests.post(f"{self.URL}check_accuracy", json={"trained_model": self.model, "test_df": test_df.to_dict(orient="records")})
-            if response.ok:
-                self.accuracy = response.json()['accuracy']
-                print(f'The testing is over. Accuracy of {self.accuracy} %')
-            else:
-                print("There was a problem checking accuracy.")
-                print(response.status_code)
-        else:
-            print("There was a problem loading the file.")
-
-    def suggest_deleting_columns(self, df):
+    def suggest_deleting_columns(self):
         choice = input("1. to delete any column of the table before training\n"
                        "2. to continue to training")
         if choice == "1":
-            columns_to_delete = []
-            list_of_columns = Extract_keys.get_column_names(df)[:-1]
-            while len(list_of_columns) > 0:
-                chosen_column = Menu.suggest_options(list_of_columns)
-                columns_to_delete.append(chosen_column)
-                list_of_columns.remove(chosen_column)
-                done = input("write 'done' to execute, any other key to continue inserting")
-                if done == "done":
-                    break
-            print("executing..")
-            cleaned_df = Cleaner.drop_requested_columns(df, columns_to_delete)
+            columns_to_drop = []
+            response = requests.get(f"{self.URL}get_columns_list")
+            if response.ok:
+                list_of_columns = response.json()["columns_to_delete"]
+                while len(list_of_columns) > 0:
+                    chosen_column = Menu.suggest_options(list_of_columns)
+                    columns_to_drop.append(chosen_column)
+                    list_of_columns.remove(chosen_column)
+                    done = input("write 'done' to execute, any other key to continue inserting")
+                    if done == "done":
+                        break
+                print("executing..")
+                response = requests.post(f"{self.URL}drop_requested_columns", json={"columns_to_drop": columns_to_drop})
+                if response.ok:
+                    print("The requested columns has been dropped")
+                else:
+                    print("There was a problem dropping the columns")
+                    print(f"status code: {response.status_code}")
+            else:
+                print("there was a problem getting to the columns to delete")
+                print(f"status code: {response.status_code}")
         elif choice == "2":
             print("Here we go")
-            return df
         else:
             print("invalid input")
-            return self.suggest_deleting_columns(df)
-        return cleaned_df
+            self.suggest_deleting_columns()
