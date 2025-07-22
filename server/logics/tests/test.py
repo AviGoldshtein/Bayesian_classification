@@ -1,4 +1,4 @@
-from server.logics.models.classifier import Classifier
+from logics.models.classifier import Classifier
 
 class Tester:
     @staticmethod
