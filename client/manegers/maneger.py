@@ -3,7 +3,8 @@ import requests
 
 class Manager:
     def __init__(self):
-        self.URL = "http://bayesian_server:8000/"
+        # self.URL = "http://bayesian_server:8000/"
+        self.URL = "http://localhost:8000/"
 
     def run(self):
         running = True
