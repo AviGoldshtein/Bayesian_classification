@@ -1,4 +1,4 @@
-class Store:
+class Storage:
     def __init__(self):
         self.model = None
         self.accuracy = None

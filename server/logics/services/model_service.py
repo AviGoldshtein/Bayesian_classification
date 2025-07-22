@@ -8,7 +8,11 @@ class ModelService:
     @staticmethod
     def get_model_metadata(store):
         if store.model:
-            return {"model": True, "features_and_unique_keys": convert_numpy_types(store.features_and_unique_keys)}
+            return {"model": True,
+                    "features_and_unique_keys": convert_numpy_types(store.features_and_unique_keys),
+                    "trained_model": convert_numpy_types(store.model),
+                    "accuracy": store.accuracy
+            }
         else:
             return {"model": False}
 
