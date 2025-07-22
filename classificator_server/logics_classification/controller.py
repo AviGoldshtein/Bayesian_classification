@@ -15,7 +15,8 @@ class Controller:
 
     def update_storage(self):
         try:
-            response = requests.get("http://127.0.0.1:8000/get_model_metadata")
+            response = requests.get("http://baesyan_server_con:8000/get_model_metadata")  # for docker
+            # response = requests.get("http://127.0.0.1:8000/get_model_metadata")
             if response.ok:
                 content = response.json()
                 if content['model']:
