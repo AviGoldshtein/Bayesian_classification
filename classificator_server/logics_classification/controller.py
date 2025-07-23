@@ -9,17 +9,17 @@ class Controller:
 
     def get_features_and_unique_keys(self):
         if self._model:
-            return {"model": True, "features_and_unique_keys": self._features_and_unique_keys}
+            return {"exists": True, "features_and_unique_keys": self._features_and_unique_keys}
         else:
-            return {"model": False}
+            return {"exists": False}
 
     def update_storage(self):
         try:
-            response = requests.get("http://baesyan_server_con:8000/get_model_metadata")  # for docker
-            # response = requests.get("http://127.0.0.1:8000/get_model_metadata")
+            # response = requests.get("http://baesyan_server_con:8000/get_model_metadata")  # for docker
+            response = requests.get("http://127.0.0.1:8000/get_model_metadata")
             if response.ok:
                 content = response.json()
-                if content['model']:
+                if content['exists']:
                     features_and_unique_keys = content['features_and_unique_keys']
                     trained_model = content['trained_model']
                     accuracy = content['accuracy']

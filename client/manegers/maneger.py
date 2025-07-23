@@ -3,11 +3,11 @@ import requests
 
 class Manager:
     def __init__(self):
-        self.trainer_URL = "http://baesyan_server_con:8000/"  # for docker
-        self.classifier_URL = "http://classification_server_con:8001/"  # for docker
+        # self.trainer_URL = "http://baesyan_server_con:8000/"  # for docker
+        # self.classifier_URL = "http://classification_server_con:8001/"  # for docker
 
-        # self.trainer_URL = "http://127.0.0.1:8000/"
-        # self.classifier_URL = "http://127.0.0.1:8001/"
+        self.trainer_URL = "http://127.0.0.1:8000/"
+        self.classifier_URL = "http://127.0.0.1:8001/"
 
     def run(self):
         running = True
@@ -52,7 +52,7 @@ class Manager:
                     response = requests.get(f"{self.classifier_URL}get_features_and_unique_keys")
                     if response.ok:
                         content = response.json()
-                        if content['model']:
+                        if content['exists']:
                             features_and_unique_keys = content['features_and_unique_keys']
                             chosen_params_and_values = Menu.choose_params_and_values(features_and_unique_keys)
                             response = requests.post(f"{self.classifier_URL}classify", json=chosen_params_and_values)
