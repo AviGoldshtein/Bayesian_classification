@@ -15,6 +15,7 @@ def get_features_and_unique_keys():
 @router.get("/update_storage")
 def update_storage():
     controller.update_storage()
+    return {"status": "success"}
 
 @router.post("/classify")
 def classification(params_and_values: dict[str, str]) -> dict:
