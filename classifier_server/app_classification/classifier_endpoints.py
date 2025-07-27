@@ -12,11 +12,11 @@ def health() -> dict:
 def get_features_and_unique_keys():
     return controller.get_features_and_unique_keys()
 
-@router.get("/update_storage")
-def update_storage():
-    controller.update_storage()
+@router.get("/sync_model_from_main_server")
+def sync_model_from_main_server():
+    controller.sync_model_from_main_server()
     return {"status": "success"}
 
 @router.post("/classify")
-def classification(params_and_values: dict[str, str]) -> dict:
-    return controller.classify(params_and_values)
+def classification(features_and_values: dict) -> dict:
+    return controller.classify(features_and_values)

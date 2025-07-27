@@ -5,7 +5,6 @@ from logics.utils.extract_keys import Extract_keys
 from logics.utils.cleaner import Cleaner
 from logics.models.naive_bayes import Naive_bayes
 from logics.tests.test import Tester
-from logics.models.classifier import Classifier
 
 class Controller:
     def __init__(self):
@@ -44,9 +43,3 @@ class Controller:
             }
         else:
             return {"exists": False}
-
-    def classify(self, params_and_values):
-        return {
-            "classification": Classifier.ask_a_question(self._model, params_and_values),
-            "accuracy": self._accuracy
-        }

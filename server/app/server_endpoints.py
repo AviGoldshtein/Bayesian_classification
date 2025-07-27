@@ -30,7 +30,7 @@ def drop_requested_columns(data: DropColumnsRequest) -> dict:
     controller.drop_columns(data.columns_to_drop)
     return {"status": "success"}
 
-@router.get("/raw_df_handler")
+@router.get("/clean_and_train_model")
 def raw_df_handler() -> dict:
     accuracy = controller.clean_and_train_model()
     return {"accuracy": accuracy}
@@ -38,7 +38,3 @@ def raw_df_handler() -> dict:
 @router.get("/get_model_metadata")
 def get_features_and_unique_keys_and_model() -> dict:
     return controller.get_model_metadata()
-
-@router.post("/classify")
-def classify(params_and_values: dict[str, str]) -> dict:
-    return controller.classify(params_and_values)

@@ -1,7 +1,6 @@
 # 🧠 Bayesian Classification API with FastAPI
 
-Welcome to the **Bayesian Classifier** project!  
-This project lets you load a CSV, train a Naive Bayes model on it, and make predictions — all through a clean REST API built with **FastAPI**.
+Welcome to the **Bayesian Classification** project — a modular system for training and predicting with a Naive Bayes model over CSV files, using a clean REST API powered by **FastAPI** and a structured client-server architecture.
 
 ---
 
@@ -11,7 +10,10 @@ This project lets you load a CSV, train a Naive Bayes model on it, and make pred
 ✅ Train a Naive Bayes classifier  
 ✅ Make predictions via REST API  
 ✅ Automatic handling of missing values  
-✅ Organized client-server architecture
+✅ Layered architecture (DAL, logic, model, utils, UI)  
+✅ CLI-based interactive client  
+✅ Modular API with separated endpoints (training & classification)  
+✅ Docker-ready
 
 ---
 
@@ -19,32 +21,51 @@ This project lets you load a CSV, train a Naive Bayes model on it, and make pred
 
 ```
 Bayesian_classification/
-├── client/                            # Client-side interface (CLI-based)
+├── client/                                  # CLI-based user interface
 │   ├── managers/
-│   │   └── manager.py                # Manages client flow and communication with server
+│   │   └── manager.py                       # Manages the full client-side workflow
 │   ├── ui/
-│   │   └── menu.py                   # Handles user interaction and menu display
-│   ├── utiles/
-│   │   ├── cleaner.py                # Cleans data before sending to server
-│   │   └── extract_keyes.py          # Utility to extract keys and lables from the DataFrame
-│   └── main.py                       # Entry point for the client
-├── server/                            # Server-side FastAPI application
-│   ├── app/
-│   │   ├── app.py                    # Initializes FastAPI app and includes routers
-│   │   └── endpoints.py              # All API endpoints (routes)
-│   ├── data/                         # Directory for CSV files to load and analyze
-│   ├── logics/
-│   │   ├── dal/
-│   │   │   └── dal.py                # Data Access Layer — loads and manages raw data
+│   │   └── menu.py                          # Displays interactive menu and gets user input
+│   ├── main.py                              # Entry point to launch the CLI app
+│   └── Dockerfile                           # Docker config for client container
+
+├── classifier_server/                       # Classification microservice (independent API)
+│   ├── app_classification/
+│   │   ├── app.py                           # Initializes FastAPI app for classifier
+│   │   └── classifier_endpoints.py          # Endpoints for classification logic (predict, sync, health)
+│   ├── logics_classification/
 │   │   ├── models/
-│   │   │   ├── classifier.py         # High-level classifier wrapper
-│   │   │   └── naive_bayes.py        # Core Naive Bayes algorithm logic
+│   │   │   └── classifier.py                # Loads trained model and performs classification
+│   │   └── controller.py                    # Controller layer for classification logic
+│   ├── run_classifier_server.py             # Script to launch the classifier API server
+│   └── Dockerfile                           # Docker config for classification server
+
+├── server/                                  # Training and data-prep backend
+│   ├── app/
+│   │   ├── app.py                           # Initializes FastAPI app for training server
+│   │   └── server_endpoints.py              # Endpoints for model training, data loading, cleanup
+│   ├── data/                                # Directory to store CSV files
+│   ├── logics/                              # Application logic layer
+│   │   ├── dal/
+│   │   │   └── dal.py                       # Data access layer — loads/parses CSVs
+│   │   ├── models/
+│   │   │   ├── classifier.py                # Stores the trained model and associated metadata
+│   │   │   └── naive_bayes.py               # Core implementation of Naive Bayes logic
 │   │   ├── tests/
-│   │   │   └── test.py               # Basic tests for model accuracy
-│   │   └── utiles/
-│   │       └── servise.py            # Helper functions for model training/processing
-│   └── run_server.py                 # Entry point to run the FastAPI server
-└── README.md                         # Project documentation (you are here)
+│   │   │   └── test.py                      # Unit tests for the training and prediction pipeline
+│   │   ├── utils/
+│   │   │   ├── cleaner.py                   # Cleans data, handles missing values
+│   │   │   ├── extract_keys.py              # Extracts unique keys for label encoding
+│   │   │   └── service.py                   # Supporting service functions for training
+│   │   └── controller.py                    # Coordinates between endpoints and logic
+│   ├── run_server.py                        # Script to run the training API server
+│   └── Dockerfile                           # Docker config for training server
+
+├── requirements.txt                         # Shared Python dependencies for all components
+├── .gitignore                               # Git exclusions for venv, pycache, etc.
+├── building_the_tocker.txt                  # Notes or script for building Docker images (typo?)
+└── README.md                                # Project documentation (you are here)
+
 ```
 
 ---
@@ -53,7 +74,7 @@ Bayesian_classification/
 
 ```bash
 git clone https://github.com/AviGoldshtein/Bayesian_classification.git
-cd bayesian-classification
+cd Bayesian_classification
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -61,31 +82,61 @@ pip install -r requirements.txt
 
 ---
 
-## 🏁 Run the Server
+## 🏁 Run the Servers
+
+### Main training server:
 
 ```bash
-uvicorn app.app:app --reload
+cd server
+python run_server.py
 ```
 
-Access docs at: [http://localhost:8000/](http://localhost:8000/)
+### Classifier server:
+
+```bash
+cd classifier_server
+python run_classifier_server.py
+```
+
+### Client side:
+
+```bash
+cd client
+python main.py
+```
 
 ---
 
-## 🧪 API Endpoints
+## 📡 API Endpoints Overview
 
-| Method | Path                     | Description                         |
-|--------|--------------------------|-------------------------------------|
-| GET    | `/`                      | Health check                        |
-| GET    | `/get_files_list`        | List available CSV files            |
-| GET    | `/load_data/{filename}`  | Load and return CSV as JSON         |
-| POST   | `/train_model`           | Train model with JSON DataFrame     |
-| POST   | `/check_accuracy`        | Check Accuracy of the trained model |
+### 🧩 server_endpoints.py (Training Server)
+
+| Method | Path                        | Description                          |
+|--------|-----------------------------|--------------------------------------|
+| GET    | `/`                         | Health check                         |
+| GET    | `/get_files_list`           | List available CSV files             |
+| GET    | `/load_data/{chosen_file}`  | Load selected CSV file               |
+| GET    | `/get_columns_list`         | Get list of columns for removal      |
+| POST   | `/drop_requested_columns`   | Drop selected columns from dataset   |
+| GET    | `/clean_and_train_model`    | Train model and return accuracy      |
+| GET    | `/get_model_metadata`       | Return features, values, and model   |
+
 
 ---
 
-## 📤 Sending a DataFrame
+### 🎯 classifier_endpoints.py (Classification Server)
 
-To send a DataFrame from the client to the server:
+| Method | Path                              | Description                                 |
+|--------|-----------------------------------|---------------------------------------------|
+| GET    | `/`                               | Health check                                |
+| GET    | `/get_features_and_unique_keys`   | Get model features and their unique values  |
+| GET    | `/sync_model_from_main_server`    | Sync model from the training server         |
+| POST   | `/classify`                       | Classify given input feature values         |
+
+
+---
+
+## 🧪 Sending a DataFrame
 
 ```python
 import pandas as pd
@@ -94,7 +145,7 @@ import requests
 df = pd.read_csv("data.csv")
 
 response = requests.post(
-    "http://localhost:8000/train_model",
+    "http://127.0.0.1:8000/train_model",
     json=df.to_dict(orient="records")
 )
 
@@ -103,7 +154,14 @@ print(response.json())
 
 ---
 
-## 🔍 Example Output
+## 🧠 Model Logic
+
+Custom Naive Bayes implementation using categorical probability and Laplace smoothing.  
+The target column is assumed to be the **last column** in the DataFrame.
+
+---
+
+## 📤 Example Output
 
 ```json
 {
@@ -123,14 +181,53 @@ print(response.json())
 
 ---
 
-## 🧠 Model Logic
+## 🐳 Docker
 
-Uses **Laplace smoothing** and categorical statistics to estimate probabilities.  
-Target column is assumed to be the **last column** in the DataFrame.
+Each server module has its own Dockerfile.
+
+```bash
+# Build the main training server image
+cd server
+docker build -t avigoldshtein/baesyan_server:v1.0 .
+
+# Build the classification server image
+cd classifier_server
+docker build -t classifier_server .
+
+# Build the client image
+cd client
+docker build -t avigoldshtein/baesyan_client:v1.0 .
+
+```
+```bash
+# Create a shared Docker network
+docker network create bayesian_network
+
+# Run the training server
+docker run -d \
+  --name baesyan_server_con \
+  --network bayesian_network \
+  -p 8000:8000 \
+  avigoldshtein/baesyan_server:v1.0
+
+# Run the classification server
+docker run -d \
+  --name classification_server_con \
+  --network bayesian_network \
+  -p 8001:8001 \
+  classifier_server
+
+# Run the CLI client interactively
+docker run -it \
+  --name baesyan_client \
+  --network bayesian_network \
+  avigoldshtein/baesyan_client:v1.0
+
+```
 
 ---
 
 ## 🤝 Contributing
 
-Pull requests are welcome!  
-For major changes, please open an issue first to discuss what you'd like to change.
+Pull requests are welcome.  
+For major changes, please open an issue first to discuss your ideas.

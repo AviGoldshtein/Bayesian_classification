@@ -3,7 +3,7 @@ import numpy as np
 
 class Classifier:
     @staticmethod
-    def ask_a_question(model: dict, dict_test: Dict[str, str]) -> str:
+    def predict(model: dict, dict_test: Dict) -> str:
         """
         Predicts the most likely class using a trained Naive Bayes model and input features.
 

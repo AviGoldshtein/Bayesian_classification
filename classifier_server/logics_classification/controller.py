@@ -13,7 +13,7 @@ class Controller:
         else:
             return {"exists": False}
 
-    def update_storage(self):
+    def sync_model_from_main_server(self):
         try:
             # response = requests.get("http://baesyan_server_con:8000/get_model_metadata")  # for docker
             response = requests.get("http://127.0.0.1:8000/get_model_metadata")
@@ -27,13 +27,13 @@ class Controller:
                     self._features_and_unique_keys = features_and_unique_keys
                     self._model = trained_model
                     self._accuracy = accuracy
-                    print("updated successfully")
+                    print("synced successfully with main server.")
         except Exception as e:
             print("There was a error with the server.")
             print(f"Error: {e}.")
 
     def classify(self, params_and_values: dict[str, str]) -> dict:
         return {
-            "classification": Classifier.ask_a_question(self._model, params_and_values),
+            "classification": Classifier.predict(self._model, params_and_values),
             "accuracy": self._accuracy
         }

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .endpoints import router
+from .classifier_endpoints import router
 
 app = FastAPI()
 
