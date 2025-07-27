@@ -27,7 +27,7 @@ class Manager:
 
     def handel_file_choice(self):
         try:
-            response = requests.get(self.trainer_URL + "get_files_list")
+            response = requests.get(self.trainer_URL + "files_list")
             if response.ok:
                 list_of_files = response.json()['files_list']
                 chosen_file = Menu.suggest_options(list_of_files)
@@ -73,7 +73,7 @@ class Manager:
                     if response.ok:
                         content = response.json()
                         print(f"the answer is:  {content['classification']}.\n"
-                              f"but take care because the accuracy is {content['accuracy']}%.")
+                              f"The accuracy of this model is {content['accuracy']}%.")
                     else:
                         print("There was a problem with the classification")
                         print(f"status code: {response.status_code}")
@@ -91,18 +91,18 @@ class Manager:
                        "2. to continue to training")
         if choice == "1":
             columns_to_drop = []
-            response = requests.get(f"{self.trainer_URL}get_columns_list")
+            response = requests.get(f"{self.trainer_URL}deletable_columns")
             if response.ok:
-                list_of_columns = response.json()["columns_to_delete"]
-                while len(list_of_columns) > 0:
-                    chosen_column = Menu.suggest_options(list_of_columns)
+                deletable_columns = response.json()["deletable_columns"]
+                while len(deletable_columns) > 0:
+                    chosen_column = Menu.suggest_options(deletable_columns)
                     columns_to_drop.append(chosen_column)
-                    list_of_columns.remove(chosen_column)
+                    deletable_columns.remove(chosen_column)
                     done = input("write 'done' to execute, any other key to continue inserting")
                     if done == "done":
                         break
                 print("executing..")
-                response = requests.post(f"{self.trainer_URL}drop_requested_columns", json={"columns_to_drop": columns_to_drop})
+                response = requests.post(f"{self.trainer_URL}drop_columns", json={"columns_to_drop": columns_to_drop})
                 if response.ok:
                     print("The requested columns has been dropped")
                 else:

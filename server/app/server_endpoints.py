@@ -12,29 +12,29 @@ controller = Controller()
 def health() -> dict:
     return {"message": "working"}
 
-@router.get("/get_files_list")
+@router.get("/files_list")
 def get_files_list() -> dict:
     return {"files_list": controller.get_list_files()}
 
-@router.get("/load_data/{chosen_file}")
-def load_data(chosen_file) -> dict:
-    controller.load_and_store_file(chosen_file)
+@router.get("/load_data/{file_name}")
+def load_data(file_name: str) -> dict:
+    controller.load_and_store_file(file_name)
     return {"status": "success"}
 
-@router.get("/get_columns_list")
-def get_columns_list() -> dict:
-    return {"columns_to_delete": controller.get_columns_list()}
+@router.get("/deletable_columns")
+def get_deletable_columns() -> dict:
+    return {"deletable_columns": controller.get_deletable_columns()}
 
-@router.post("/drop_requested_columns")
+@router.post("/drop_columns")
 def drop_requested_columns(data: DropColumnsRequest) -> dict:
     controller.drop_columns(data.columns_to_drop)
     return {"status": "success"}
 
 @router.get("/clean_and_train_model")
-def raw_df_handler() -> dict:
+def clean_and_train() -> dict:
     accuracy = controller.clean_and_train_model()
     return {"accuracy": accuracy}
 
-@router.get("/get_model_metadata")
-def get_features_and_unique_keys_and_model() -> dict:
+@router.get("/model_metadata")
+def get_model_metadata() -> dict:
     return controller.get_model_metadata()

@@ -20,7 +20,7 @@ class Controller:
         df = Dal.load_data(filename)
         self._pending_data = df
 
-    def get_columns_list(self):
+    def get_deletable_columns(self):
         return Extract_keys.get_column_names(self._pending_data)[:-1]
 
     def drop_columns(self, columns_to_drop):

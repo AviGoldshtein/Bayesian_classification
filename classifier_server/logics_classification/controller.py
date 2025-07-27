@@ -15,8 +15,8 @@ class Controller:
 
     def sync_model_from_main_server(self):
         try:
-            # response = requests.get("http://baesyan_server_con:8000/get_model_metadata")  # for docker
-            response = requests.get("http://127.0.0.1:8000/get_model_metadata")
+            # response = requests.get("http://baesyan_server_con:8000/model_metadata")  # for docker
+            response = requests.get("http://127.0.0.1:8000/model_metadata")
             if response.ok:
                 content = response.json()
                 if content['exists']:
