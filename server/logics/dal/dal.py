@@ -11,6 +11,8 @@ class Dal:
         :return: pandas DataFrame with the contents of the file.
         """
         path = f"data/{file}"
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"The file '{file}' does not exist.")
         df = pd.read_csv(path)
         return df
     @staticmethod
