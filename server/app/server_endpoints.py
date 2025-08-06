@@ -8,7 +8,7 @@ class DropColumnsRequest(BaseModel):
 router = APIRouter()
 controller = Controller()
 
-@router.get("/")
+@router.get("/health")
 def health() -> dict:
     return {"message": "working"}
 
