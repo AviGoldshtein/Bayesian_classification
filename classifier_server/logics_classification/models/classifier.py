@@ -1,6 +1,7 @@
 from typing import Dict
 import numpy as np
 
+
 class Classifier:
     @staticmethod
     def predict(model: dict, dict_test: Dict) -> str:
@@ -18,6 +19,8 @@ class Classifier:
                 continue
 
             for feature, value in dict_test.items():
+                if feature not in model[label] or value not in model[label][feature]:
+                    raise ValueError(f"Invalid input: feature '{feature}' with value '{value}' not in model.")
                 try:
                     num = model[label][feature][value]
                 except KeyError:

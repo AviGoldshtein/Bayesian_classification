@@ -1,6 +1,7 @@
 from logics_classification.models.classifier import Classifier
 import requests
 
+
 class Controller:
     def __init__(self):
         self._model = None
@@ -32,7 +33,7 @@ class Controller:
             print("There was a error with the server.")
             print(f"Error: {e}.")
 
-    def classify(self, params_and_values: dict[str, str]) -> dict:
+    def classify(self, params_and_values: dict) -> dict:
         return {
             "classification": Classifier.predict(self._model, params_and_values),
             "accuracy": self._accuracy

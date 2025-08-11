@@ -3,18 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bayesian clsssifier</title>
+    <title>Bayesian Classifier</title>
     <link rel="stylesheet" href="static/styles/style.css">
     <link rel="icon" type="image/png" href="static/images/icon_classifier.png">
 </head>
 <body>
-    <h1>Welcome to the Server</h1>
-    <p>This is a static HTML page served by the server.</p>
-    <p>Feel free to explore the content and styles.</p>
-    <p>Check the console for any messages.</p>
-    <p>Enjoy your stay!</p>
-    <button onclick="loadFile()">Click Me</button>
+    <h1>Bayesian Classifier</h1>
+    <p style="max-width: 700px; font-size: 1.1em; margin: 0 auto; text-align: center;">
+        Welcome to our interactive Bayesian Classifier tool. This platform allows you to explore how probabilistic machine learning models work by selecting different feature values and instantly receiving predictions based on your input.
+        It's a hands-on way to understand how Naive Bayes classification can be applied to real-world datasets.
+        <br><br>
+        Simply choose values for the available features below, and let the model do the rest.
+    </p>
+
     <div id="select-container"></div>
+    <div id="features-container"></div>
+
+    <!-- Modal HTML -->
+    <div id="predictionModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" class="close">&times;</span>
+            <h2>Prediction Result</h2>
+            <p id="predictionText"></p>
+        </div>
+    </div>
+
     <script src="static/scripts/script.js"></script>
 </body>
 </html>
